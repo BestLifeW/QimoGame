@@ -13,9 +13,19 @@ public class Enemy extends Sprite {
 
     private CopyOnWriteArrayList<Bullet> aBullets;
     private int count;
+    private Blast aBlast;
 
     public Enemy(Bitmap aBitmap) {
         super(aBitmap);
+
+    }
+
+    public void setaBlast(Blast aBlast) {
+        this.aBlast = aBlast;
+    }
+
+    public Blast getaBlast() {
+        return aBlast;
     }
 
     public CopyOnWriteArrayList<Bullet> getaBullets() {
@@ -34,6 +44,9 @@ public class Enemy extends Sprite {
                 bullet.draw(lockCanvas);
             }
         }
+        if (aBlast!=null){
+            aBlast.draw(lockCanvas);
+        }
     }
 
 
@@ -48,6 +61,10 @@ public class Enemy extends Sprite {
                 bullet.logic();
             }
         }
+        if (aBlast!=null){
+            aBlast.logic();
+        }
+
         outOfBounds();
     }
 
@@ -68,4 +85,6 @@ public class Enemy extends Sprite {
             setVisible(false);
         }
     }
+
+
 }

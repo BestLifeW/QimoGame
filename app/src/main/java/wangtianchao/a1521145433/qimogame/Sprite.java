@@ -2,6 +2,7 @@ package wangtianchao.a1521145433.qimogame;
 
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
+import android.graphics.Rect;
 
 /**
  * Created by lovec on 2016/11/26.
@@ -18,12 +19,35 @@ public class Sprite {
     private int speedX;
     private int speedY;
     private boolean isVisible;
+    private Rect src;
+    private Rect dst;
+    private int[] frameX;
+    private int[] frameY;
+    private int frameIndex;
+    private int frameNumber;
 
     public Sprite(Bitmap aBitmap) {
-        super();
+        this(aBitmap, aBitmap.getWidth(), aBitmap.getHeight());
+    }
+
+    public Sprite(Bitmap aBitmap, int width, int height) {
         this.aBitmap = aBitmap;
-        this.width = aBitmap.getWidth();
-        this.height = aBitmap.getHeight();
+        this.width = width;
+        this.height = height;
+        src = new Rect();
+        dst = new Rect();
+        int w = aBitmap.getWidth() / width;
+        int h = aBitmap.getHeight() / height;
+        frameNumber = w * h;
+        frameX = new int[frameNumber];
+        frameY = new int[frameNumber];
+        for (int i = 0; i < h; i++) {
+            for (int j = 0; j < w; j++) {
+                frameX[i * w + j] = width * j;
+                frameY[i * w + j] = height * i;
+            }
+
+        }
     }
 
     public Bitmap getaBitmap() {
@@ -90,6 +114,14 @@ public class Sprite {
         this.speedY = speedY;
     }
 
+    public int getFrameIndex() {
+        return frameIndex;
+    }
+
+    public void setFrameIndex(int frameIndex) {
+        this.frameIndex = frameIndex;
+    }
+
     public void setPosition(int x, int y) {
         this.x = x;
         this.y = y;
@@ -97,7 +129,9 @@ public class Sprite {
 
     public void draw(Canvas lockCanvas) {
         if (isVisible) {
-            lockCanvas.drawBitmap(aBitmap, x, y, null);
+            src.set(frameX[frameIndex], frameY[frameIndex], frameX[frameIndex] + width, frameY[frameIndex] + height);
+            dst.set(x, y, x + width, y + height);
+            lockCanvas.drawBitmap(aBitmap, src, dst, null);
         }
     }
 
@@ -115,6 +149,26 @@ public class Sprite {
         if (x < 0 || x > 480 || y < 0 || y > 800) {
             setVisible(false);
         }
+    }
+
+    public boolean collisionWith(Sprite aSprite) {
+        if (!isVisible || !aSprite.isVisible) {
+            return false;
+        }
+        if (x < aSprite.x && x + width < aSprite.x) {
+            return false;
+        } else if (aSprite.x < x && aSprite.x + aSprite.width < x) {
+            return false;
+        } else if (y < aSprite.y && y + height < aSprite.y) {
+            return false;
+        } else if (aSprite.y < y && aSprite.y + aSprite.height < y) {
+            return false;
+        }
+        return true;
+    }
+
+    public void nextFrame() {
+        frameIndex = (frameIndex + 1) % frameNumber;
     }
 
 }

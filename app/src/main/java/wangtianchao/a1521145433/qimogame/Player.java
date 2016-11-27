@@ -16,30 +16,46 @@ public class Player extends Sprite{
 
     private CopyOnWriteArrayList<Bullet> mBullets;
     private int count;
+    private Blast aBlast;
 
     public Player(Bitmap bitmap) {
         super(bitmap);
 
     }
 
+    public Blast getaBlast() {
+        return aBlast;
+    }
+
+    public void setaBlast(Blast aBlast) {
+        this.aBlast = aBlast;
+    }
+
+
     public void setBullets(CopyOnWriteArrayList<Bullet> mBullets) {
         this.mBullets = mBullets;
     }
 
+    public CopyOnWriteArrayList<Bullet> getmBullets() {
+        return mBullets;
+    }
 
-    public void draw(Canvas locakCanvas) {
-        super.draw(locakCanvas);
+    public void draw(Canvas lockCanvas) {
+        super.draw(lockCanvas);
         if (mBullets != null) {
             for (Bullet bullet : mBullets) {
-                bullet.draw(locakCanvas);
+                bullet.draw(lockCanvas);
             }
+        }
+        if (aBlast!=null){
+            aBlast.draw(lockCanvas);
         }
     }
 
 
     //玩家逻辑
     public void logic() {
-        if (count++ > 10) {
+        if (count++ > 1) {
             fire(); //发射方法
             count = 0;
         }
@@ -50,6 +66,9 @@ public class Player extends Sprite{
                     bullet.setVisible(false);
                 }
             }
+        }
+        if (aBlast!=null){
+            aBlast.logic();
         }
         outOfBounds();
     }
