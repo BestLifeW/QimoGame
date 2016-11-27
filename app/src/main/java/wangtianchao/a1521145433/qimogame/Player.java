@@ -5,105 +5,35 @@ import android.graphics.Canvas;
 
 import java.util.concurrent.CopyOnWriteArrayList;
 
+
 /**
  * Created by TianChaoWang on 2016/11/25.
  * 玩家类
  */
 
-public class Player {
+public class Player extends Sprite{
 
-    private Bitmap mBitmap;
-    private int x;
-    private int y;
-    private int width;
-    private int height;
-    private boolean isVisible;
+
     private CopyOnWriteArrayList<Bullet> mBullets;
     private int count;
 
     public Player(Bitmap bitmap) {
-        super();
-        this.mBitmap = bitmap;
-        this.width = bitmap.getWidth();
-        this.height = bitmap.getHeight();
+        super(bitmap);
+
     }
 
-    public Bitmap getmBitmap() {
-        return mBitmap;
-    }
-
-    public void setmBitmap(Bitmap mBitmap) {
-        this.mBitmap = mBitmap;
-    }
-
-    public int getX() {
-        return x;
-    }
-
-    public void setX(int x) {
-        this.x = x;
-    }
-
-    public int getY() {
-        return y;
-    }
-
-    public void setY(int y) {
-        this.y = y;
-    }
-
-    public int getWidth() {
-        return width;
-    }
-
-    public void setWidth(int width) {
-        this.width = width;
-    }
-
-    public boolean isVisible() {
-        return isVisible;
-    }
-
-    public int getHeight() {
-        return height;
-    }
-
-    public void setHeight(int height) {
-        this.height = height;
-    }
-
-    public void setVisible(boolean visible) {
-        isVisible = visible;
-    }
-
-    public CopyOnWriteArrayList<Bullet> getmBullets() {
-        return mBullets;
-    }
-
-    public void setmBullets(CopyOnWriteArrayList<Bullet> mBullets) {
+    public void setBullets(CopyOnWriteArrayList<Bullet> mBullets) {
         this.mBullets = mBullets;
     }
 
-    public void setPosition(int x, int y) {
-        this.x = x;
-        this.y = y;
-    }
 
     public void draw(Canvas locakCanvas) {
-        if (isVisible) {
-            locakCanvas.drawBitmap(mBitmap, x, y, null);
-        }
+        super.draw(locakCanvas);
         if (mBullets != null) {
             for (Bullet bullet : mBullets) {
                 bullet.draw(locakCanvas);
             }
         }
-    }
-
-    //移动的方法
-    public void move(float distanceX, float distanceY) {
-        x += distanceX;
-        y += distanceY;
     }
 
 
@@ -124,26 +54,34 @@ public class Player {
         outOfBounds();
     }
 
-
+    //开火
     private void fire() {
-
+            if (mBullets!=null){
+                for (Bullet bullet :mBullets){
+                    if (!bullet.isVisible()){
+                        bullet.setPosition(getX()+getWidth()/2-bullet.getWidth()/2,getY());
+                        bullet.setVisible(true);
+                        break;
+                    }
+                }
+            }
     }
 
     /*
     * 碰撞检测
     * */
-    private void outOfBounds() {
+    public void outOfBounds() {
 
-        if (x < 0) {
-            x = 0;
-        } else if (x + width > 480) {
-            x = 480 - width;
+        if (getX() < 0) {
+            setX(0);
+        } else if (getX() + getWidth() > 480) {
+            setX(480 - getWidth());
         }
 
-        if (y < 0) {
-            y = 0;
-        } else if (y + height > 800) {
-            y = 800 - height;
+        if (getY() < 0) {
+            setY(0);
+        } else if (getY() + getHeight() > 800) {
+            setY(800 - getHeight());
         }
     }
 }
