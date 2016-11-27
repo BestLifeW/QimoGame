@@ -215,7 +215,7 @@ public class MyView extends SurfaceView implements SurfaceHolder.Callback, Runna
             lockCanvas.drawBitmap(backgroundBitmap, 0, backgroundY1, null);
             lockCanvas.drawBitmap(backgroundBitmap, 0, backgroundY2, null);
             mPaint.setColor(Color.DKGRAY);
-
+            //if (step==2000&&step)
 
             aPlayer.draw(lockCanvas);
 
