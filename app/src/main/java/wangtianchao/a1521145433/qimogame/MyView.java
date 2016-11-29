@@ -48,7 +48,6 @@ public class MyView extends SurfaceView implements SurfaceHolder.Callback, Runna
     private Paint paint;
     private Bitmap blastBitmap1;
     private Bitmap goodsBitmap;
-    private Goods goods;
     private Bitmap bigenemy;
     private CopyOnWriteArrayList<Enemy> bigenemys;
     private Bitmap bigblast;
@@ -328,12 +327,7 @@ public class MyView extends SurfaceView implements SurfaceHolder.Callback, Runna
         }
         //炸弹包
         if (step == 120) {
-            Log.i("补给出现", "出现");
-            goods = new Goods(goodsBitmap);
-            //goods.setPosition(240 - goods.getWidth() / 2 + 60 * (j - i), -goods.getHeight() - 80 * i);
-            goods.setSpeedY(5);
-            goods.logic();
-            goods.setVisible(true);
+
         }
 
         if (step >= 500 && step <= 1100) {
@@ -437,7 +431,6 @@ public class MyView extends SurfaceView implements SurfaceHolder.Callback, Runna
             mPaint.setColor(Color.DKGRAY);
             lockCanvas.drawText("得分:" + count + " 时间" + step, 20, 40, mPaint);
 
-            goods.draw(lockCanvas);
 
             lockCanvas.restore();
 
