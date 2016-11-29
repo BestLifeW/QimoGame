@@ -14,6 +14,12 @@ public class Enemy extends Sprite {
     private CopyOnWriteArrayList<Bullet> aBullets;
     private int count;
     private Blast aBlast;
+    private boolean isFire =true;
+
+
+    public void setFire(boolean fire) {
+        isFire = fire;
+    }
 
     public Enemy(Bitmap aBitmap) {
         super(aBitmap);
@@ -69,12 +75,14 @@ public class Enemy extends Sprite {
     }
 
     private void fire() {
-        if (aBullets!=null){
-            for (Bullet bullet : aBullets) {
-                if (!bullet.isVisible()){
-                    bullet.setPosition(getX()+getWidth()/2-bullet.getWidth()/2,getY()+getHeight());
-                    bullet.setVisible(true);
-                    break;
+        if (isFire){
+            if (aBullets!=null){
+                for (Bullet bullet : aBullets) {
+                    if (!bullet.isVisible()){
+                        bullet.setPosition(getX()+getWidth()/2-bullet.getWidth()/2,getY()+getHeight());
+                        bullet.setVisible(true);
+                        break;
+                }
                 }
             }
         }

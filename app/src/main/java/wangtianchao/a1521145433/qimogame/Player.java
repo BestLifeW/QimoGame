@@ -75,15 +75,17 @@ public class Player extends Sprite{
 
     //开火
     private void fire() {
-            if (mBullets!=null){
-                for (Bullet bullet :mBullets){
-                    if (!bullet.isVisible()){
-                        bullet.setPosition(getX()+getWidth()/2-bullet.getWidth()/2,getY());
-                        bullet.setVisible(true);
-                        break;
+
+                if (mBullets != null) {
+                    for (Bullet bullet : mBullets) {
+                        if (!bullet.isVisible()) {
+                            bullet.setPosition(getX() + getWidth() / 2 - bullet.getWidth() / 2, getY());
+                            bullet.setVisible(true);
+                            break;
+                        }
                     }
                 }
-            }
+
     }
 
     /*
@@ -103,4 +105,7 @@ public class Player extends Sprite{
             setY(800 - getHeight());
         }
     }
+
+
+
 }

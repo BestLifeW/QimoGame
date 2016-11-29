@@ -25,6 +25,13 @@ public class Sprite {
     private int[] frameY;
     private int frameIndex;
     private int frameNumber;
+    private boolean isFire;
+    //是否发火
+
+
+    public void setFire(boolean fire) {
+        isFire = fire;
+    }
 
     public Sprite(Bitmap aBitmap) {
         this(aBitmap, aBitmap.getWidth(), aBitmap.getHeight());

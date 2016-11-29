@@ -126,7 +126,7 @@ public class MyView extends SurfaceView implements SurfaceHolder.Callback, Runna
         aPlayer.setaBlast(playerboom);
         smallenemys = new CopyOnWriteArrayList<>();
         bigenemys = new CopyOnWriteArrayList<>();
-        aRandom = new Random();
+        aRandom = new Random(20);
         mMyMusic = new MyMusic(aMainActivity);
         mMyMusic.initSoundPool();
         mMyMusic.play("normalmusic.mp3");
@@ -207,10 +207,10 @@ public class MyView extends SurfaceView implements SurfaceHolder.Callback, Runna
     private void myCollision() {
         if (smallenemys != null || bigenemys != null) {
 
-            for (Enemy i : smallenemys) {
+            for (Enemy enemy : smallenemys) {
                 //判断碰到敌人
-                if (i.collisionWith(aPlayer)) {
-                    i.setVisible(false);
+                if (enemy.collisionWith(aPlayer)) {
+                    enemy.setVisible(false);
                     Blast blast = aPlayer.getaBlast();
                     blast.setPosition(aPlayer.getX(),aPlayer.getY());
                     blast.setVisible(true);
@@ -219,11 +219,11 @@ public class MyView extends SurfaceView implements SurfaceHolder.Callback, Runna
                     mMyMusic.stop();
                 }
                 //被子弹击中
-                if (i.getaBullets() != null) {
-                    for (Bullet j : i.getaBullets()) {
-                        if (j.collisionWith(aPlayer)) {
-                            i.setVisible(false);
-                            j.setVisible(false);
+                if (enemy.getaBullets() != null) {
+                    for (Bullet bullet : enemy.getaBullets()) {
+                        if (bullet.collisionWith(aPlayer)) {
+                            bullet.setVisible(true);
+                            enemy.setVisible(false);
                             Blast blast = aPlayer.getaBlast();
                             blast.setPosition(aPlayer.getX(),aPlayer.getY());
                             blast.setVisible(true);
@@ -235,13 +235,14 @@ public class MyView extends SurfaceView implements SurfaceHolder.Callback, Runna
                 }
                 //判断子弹击中敌人
                 if (aPlayer.getmBullets() != null) {
-                    for (Bullet j : aPlayer.getmBullets()) {
-                        if (j.collisionWith(i)) {
-                            j.setVisible(false);
-                            i.setVisible(false);
+                    for (Bullet bullet : aPlayer.getmBullets()) {
+                        if (bullet.collisionWith(enemy)) {
+                            bullet.setVisible(true);
+                            enemy.setVisible(false);
+                            //enemy.setFire(false);
                             count += 10;
-                            Blast blast = i.getaBlast();
-                            blast.setPosition(i.getX(), i.getY());
+                            Blast blast = enemy.getaBlast();
+                            blast.setPosition(enemy.getX(), enemy.getY());
                             blast.setVisible(true);
                             mMyMusic.play(mMyMusic.boomMusic);
                         }
@@ -311,13 +312,11 @@ public class MyView extends SurfaceView implements SurfaceHolder.Callback, Runna
                     Enemy bigemy = new Enemy(bigenemy);
                     aEnemy.setPosition(240 - aEnemy.getWidth() / 2 + 60 * (j - i), -aEnemy.getHeight() - 80 * i);
                     bigemy.setPosition(240 - bigemy.getWidth() / 2 + 60 * (j - i), -bigemy.getHeight() - 80 * i);
-
                     aEnemy.setSpeedY(2);
                     Blast aBlast = new Blast(blastBitmap1, 34, 34);//初始化爆炸效果
                     Blast aBlast1 = new Blast(bigblast, 68, 70);
                     aEnemy.setaBlast(aBlast);
                     aEnemy.setVisible(true);
-
                     bigemy.setaBlast(aBlast1);
                     bigemy.setVisible(true);
                     smallenemys.add(aEnemy);
@@ -334,29 +333,29 @@ public class MyView extends SurfaceView implements SurfaceHolder.Callback, Runna
             Log.i("敌人出现", "第二批");
             if (smallenemys != null) {
                 out:
-                for (Enemy i : smallenemys) {
+                for (Enemy enemy : smallenemys) {
 
-                    if (!i.isVisible()) {
-                        if (i.getaBullets() != null) {
-                            for (Bullet j : i.getaBullets()) {
-                                if (j.isVisible()) {
+                    if (!enemy.isVisible()) {
+                        if (enemy.getaBullets() != null) {
+                            for (Bullet bullet : enemy.getaBullets()) {
+                                if (bullet.isVisible()) {
                                     continue out;
                                 }
                             }
                         }
-                        i.setPosition(aRandom.nextInt(480 - i.getWidth()), -i.getHeight()+30);
+                        enemy.setPosition(aRandom.nextInt(480 - enemy.getWidth()), -enemy.getHeight()+90);
                         int speedY = aRandom.nextInt(1) + 2;
-                        i.setSpeedY(speedY);//速度
-                        int v = (int) (2 - (Math.random() * -1));//随机真负数
-                        i.setSpeedX(-v);
+                        enemy.setSpeedY(13);//速度
+                        //int v = (int) (2 - (Math.random() * -1));//随机真负数
+                        //enemy.setSpeedX(-v);
                         CopyOnWriteArrayList<Bullet> aBullets = new CopyOnWriteArrayList<>();
-                        for (int j = 0; j < aRandom.nextInt(); j++) { //子弹随机发射数量
+                       /* for (int j = 0; j < aRandom.nextInt(); j++) { //子弹随机发射数量
                             Bullet aBullet = new Bullet(bulletBitmap1);
                             aBullet.setSpeedY(speedY + 3);
                             aBullets.add(aBullet);
-                        }
-                        i.setaBullets(aBullets);
-                        i.setVisible(true);
+                        }*/
+                        //enemy.setaBullets(aBullets);
+                        enemy.setVisible(true);
                         break;
                     }
                 }
@@ -366,27 +365,27 @@ public class MyView extends SurfaceView implements SurfaceHolder.Callback, Runna
         if (step >= 1200 && step <= 1800) {
             if (bigenemys != null) {
                 out:
-                for (Enemy i : bigenemys) {
-                    if (!i.isVisible()) {
-                        if (!i.isVisible()) {
-                            if (i.getaBullets() != null) {
-                                for (Bullet j : i.getaBullets()) {
-                                    if (j.isVisible()) {
+                for (Enemy enemy : bigenemys) {
+                    if (!enemy.isVisible()) {
+                        if (!enemy.isVisible()) {
+                            if (enemy.getaBullets() != null) {
+                                for (Bullet bullet : enemy.getaBullets()) {
+                                    if (bullet.isVisible()) {
                                         continue out;
                                     }
                                 }
                             }
-                            i.setPosition(aRandom.nextInt(480 - i.getWidth()), -i.getHeight());
+                            enemy.setPosition(aRandom.nextInt(480 - enemy.getWidth()), -enemy.getHeight());
                             int speedY = aRandom.nextInt(8) + 2;
-                            i.setSpeedY(speedY);
+                            enemy.setSpeedY(speedY);
                             CopyOnWriteArrayList<Bullet> aBullets = new CopyOnWriteArrayList<>();
                             for (int j = 0; j < aRandom.nextInt(); j++) {
                                 Bullet aBullet = new Bullet(bulletBitmap1);
-                                aBullet.setSpeedY(speedY + 3);
+                                aBullet.setSpeedY(speedY);
                                 aBullets.add(aBullet);
                             }
-                            i.setaBullets(aBullets);
-                            i.setVisible(true);
+                            enemy.setaBullets(aBullets);
+                            enemy.setVisible(true);
                             break;
 
                         }
