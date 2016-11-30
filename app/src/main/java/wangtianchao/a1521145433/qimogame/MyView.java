@@ -53,6 +53,10 @@ public class MyView extends SurfaceView implements SurfaceHolder.Callback, Runna
     private Bitmap bigblast;
     private Bitmap myplaneboom;
     private Blast playerboom;
+    private Goods mGoods;
+    private static final String TAG = "MyView";
+    private BossEnemy mBossEnemy;
+    private Bitmap BossBitmap;
 
     public MyView(Context context) {
         super(context);
@@ -98,22 +102,15 @@ public class MyView extends SurfaceView implements SurfaceHolder.Callback, Runna
     * */
     private void init() {
 
-        backgroundBitmap = aMainActivity.getBitmap("bg_02.jpg");
-        playerBitmap = aMainActivity.getBitmap("oneplane.png");
-        bulletBitmap = aMainActivity.getBitmap("bullet2.png");
-        smallenemy = aMainActivity.getBitmap("small.png");
-        bulletBitmap1 = aMainActivity.getBitmap("bullet.png");
-        blastBitmap1 = aMainActivity.getBitmap("smallboom.png");
-        bigblast = aMainActivity.getBitmap("blast.png");
-        goodsBitmap = aMainActivity.getBitmap("goods.png");
-        bigenemy = aMainActivity.getBitmap("enemy.png");
-
-        myplaneboom = aMainActivity.getBitmap("myplaneboom.png");
+        iniBitmap();
         backgroundY1 = backgroundBitmap.getHeight();
         backgroundY2 = 0;
 
         aPlayer = new Player(playerBitmap);
         aPlayer.setPosition(240 - aPlayer.getWidth() / 2, 700 - aPlayer.getHeight());
+        //初始化食物
+
+
         CopyOnWriteArrayList<Bullet> aBullets = new CopyOnWriteArrayList<>();
         for (int i = 0; i < 100; i++) {
             Bullet aBullet = new Bullet(bulletBitmap);
@@ -133,6 +130,24 @@ public class MyView extends SurfaceView implements SurfaceHolder.Callback, Runna
         step = 0;
         gameOver = false;
         count = 0; //分数重置
+    }
+
+
+    /*
+    *
+    * 初始化图片*/
+    private void iniBitmap() {
+        backgroundBitmap = aMainActivity.getBitmap("bg_02.jpg");
+        playerBitmap = aMainActivity.getBitmap("oneplane.png");
+        bulletBitmap = aMainActivity.getBitmap("bullet2.png");
+        smallenemy = aMainActivity.getBitmap("small.png");
+        bulletBitmap1 = aMainActivity.getBitmap("bullet.png");
+        blastBitmap1 = aMainActivity.getBitmap("smallboom.png");
+        bigblast = aMainActivity.getBitmap("blast.png");
+        goodsBitmap = aMainActivity.getBitmap("goods.png");
+        bigenemy = aMainActivity.getBitmap("enemy.png");
+        myplaneboom = aMainActivity.getBitmap("myplaneboom.png");
+        BossBitmap = aMainActivity.getBitmap("bossplane1.png");
     }
 
     @Override
@@ -188,6 +203,9 @@ public class MyView extends SurfaceView implements SurfaceHolder.Callback, Runna
 
         myStep();
         aPlayer.logic();
+        if (mGoods!=null){
+            mGoods.logic();
+        }
         if (smallenemys != null) {
             for (Enemy i : smallenemys) {
                 i.logic();
@@ -205,6 +223,7 @@ public class MyView extends SurfaceView implements SurfaceHolder.Callback, Runna
     *
     * */
     private void myCollision() {
+        //小型飞机的碰撞方法
         if (smallenemys != null || bigenemys != null) {
 
             for (Enemy enemy : smallenemys) {
@@ -215,7 +234,7 @@ public class MyView extends SurfaceView implements SurfaceHolder.Callback, Runna
                     blast.setPosition(aPlayer.getX(),aPlayer.getY());
                     blast.setVisible(true);
                     aPlayer.setVisible(false);
-                    gameOver = true;
+                    //gameOver = true;
                     mMyMusic.stop();
                 }
                 //被子弹击中
@@ -226,9 +245,9 @@ public class MyView extends SurfaceView implements SurfaceHolder.Callback, Runna
                             enemy.setVisible(false);
                             Blast blast = aPlayer.getaBlast();
                             blast.setPosition(aPlayer.getX(),aPlayer.getY());
-                            blast.setVisible(true);
-                            aPlayer.setVisible(false);
-                            gameOver = true;
+                            //blast.setVisible(true);
+                            //aPlayer.setVisible(false);
+                            //gameOver = true;
                             mMyMusic.stop();
                         }
                     }
@@ -239,8 +258,8 @@ public class MyView extends SurfaceView implements SurfaceHolder.Callback, Runna
                         if (bullet.collisionWith(enemy)) {
                             bullet.setVisible(true);
                             enemy.setVisible(false);
-                            //enemy.setFire(false);
-                            count += 10;
+                            enemy.setFire(false);
+                            count += 10;//积分
                             Blast blast = enemy.getaBlast();
                             blast.setPosition(enemy.getX(), enemy.getY());
                             blast.setVisible(true);
@@ -251,15 +270,17 @@ public class MyView extends SurfaceView implements SurfaceHolder.Callback, Runna
                 }
 
             }
+
+            //大型飞机的碰撞
             for (Enemy i : bigenemys) {
                 //判断碰到敌人
                 if (i.collisionWith(aPlayer)) {
                     i.setVisible(false);
                     Blast blast = aPlayer.getaBlast();
                     blast.setPosition(aPlayer.getX(),aPlayer.getY());
-                    blast.setVisible(true);
+                    //blast.setVisible(true);
                     aPlayer.setVisible(false);
-                    gameOver = true;
+                    //gameOver = true;
                     mMyMusic.stop();
                 }
                 //被子弹击中
@@ -270,9 +291,9 @@ public class MyView extends SurfaceView implements SurfaceHolder.Callback, Runna
                             i.setVisible(false);
                             Blast blast = aPlayer.getaBlast();
                             blast.setPosition(aPlayer.getX(),aPlayer.getY());
-                            blast.setVisible(true);
+                            //blast.setVisible(true);
                             aPlayer.setVisible(false);
-                            gameOver = true;
+                           // gameOver = true;
                             mMyMusic.stop();
                         }
                     }
@@ -291,6 +312,16 @@ public class MyView extends SurfaceView implements SurfaceHolder.Callback, Runna
                         }
                     }
                 }
+
+                //食物的碰撞
+                if (aPlayer!=null){
+                    if (mGoods!=null){
+                    if (aPlayer.collisionWith(mGoods)){
+                        mGoods.setVisible(false);
+                        aPlayer.setFirecount(1);
+                    }
+                }}
+
             }
 
         }
@@ -302,39 +333,78 @@ public class MyView extends SurfaceView implements SurfaceHolder.Callback, Runna
     * */
     private void myStep() {
         step++;
-        //Log.i("敌人出现", "myStep: "+step);
+
         //小型飞机
         if (step == 100) {
-            Log.i("敌人出现", "第一批");
-            for (int i = 0; i < 4; i++) {
-                for (int j = 0; j < 2 * i + 1; j++) {
-                    Enemy aEnemy = new Enemy(smallenemy);
-                    Enemy bigemy = new Enemy(bigenemy);
-                    aEnemy.setPosition(240 - aEnemy.getWidth() / 2 + 60 * (j - i), -aEnemy.getHeight() - 80 * i);
-                    bigemy.setPosition(240 - bigemy.getWidth() / 2 + 60 * (j - i), -bigemy.getHeight() - 80 * i);
-                    aEnemy.setSpeedY(2);
-                    Blast aBlast = new Blast(blastBitmap1, 34, 34);//初始化爆炸效果
-                    Blast aBlast1 = new Blast(bigblast, 68, 70);
-                    aEnemy.setaBlast(aBlast);
-                    aEnemy.setVisible(true);
-                    bigemy.setaBlast(aBlast1);
-                    bigemy.setVisible(true);
-                    smallenemys.add(aEnemy);
-                    bigenemys.add(bigemy);
-                }
-            }
+            FristEnemy();
+
         }
         //炸弹包
-        if (step == 120) {
+        if (step == 120&&step<=500) {
+            ShowGoods();
 
         }
-
+        //展示小型飞机
         if (step >= 500 && step <= 1100) {
-            Log.i("敌人出现", "第二批");
-            if (smallenemys != null) {
-                out:
-                for (Enemy enemy : smallenemys) {
+            ShowSmallEnemy();
 
+        }
+        //难度加大 出现中型飞机
+        if (step >= 1200 && step <= 1800) {
+            ShowBigEnemy();
+        }
+        //出现BOSS
+        if (step >= 1801&&step<=2500) {
+            ShowBoss();
+        }
+    }
+
+    private void FristEnemy() {
+        //Log.i("敌人出现", "第一批");
+        for (int i = 0; i < 4; i++) {
+            for (int j = 0; j < 2 * i + 1; j++) {
+                Enemy aEnemy = new Enemy(smallenemy);
+                Enemy bigemy = new Enemy(bigenemy);
+                aEnemy.setPosition(240 - aEnemy.getWidth() / 2 + 60 * (j - i), -aEnemy.getHeight() - 80 * i);
+                bigemy.setPosition(240 - bigemy.getWidth() / 2 + 60 * (j - i), -bigemy.getHeight() - 80 * i);
+                aEnemy.setSpeedY(2);
+                Blast aBlast = new Blast(blastBitmap1, 34, 34);//初始化爆炸效果
+                Blast aBlast1 = new Blast(bigblast, 68, 70);
+                aEnemy.setaBlast(aBlast);
+                aEnemy.setVisible(true);
+                bigemy.setaBlast(aBlast1);
+                bigemy.setVisible(true);
+                smallenemys.add(aEnemy);
+                bigenemys.add(bigemy);
+            }
+        }
+    }
+
+    private void ShowBoss() {
+        Log.i("敌人出现", "老大出现");
+        mBossEnemy = new BossEnemy(BossBitmap);
+        Log.i(TAG, "ShowBoss: "+mBossEnemy.getPosition()+mBossEnemy.getWidth()+mBossEnemy.getHeight());
+        mBossEnemy.setSpeedX(5);
+        mBossEnemy.outOfBounds();
+        mBossEnemy.setPosition(30,80);
+
+        CopyOnWriteArrayList<Bullet> abullets = new CopyOnWriteArrayList<>();
+        for (int i=1;i<=step;i++){
+            Bullet abullet= new Bullet(bulletBitmap);
+            abullets.add(abullet);
+            abullet.setSpeedY(3);
+        }
+        mBossEnemy.setaBullets(abullets);
+
+        mBossEnemy.logic();
+        mBossEnemy.setVisible(true);
+    }
+
+    private void ShowBigEnemy() {
+        if (bigenemys != null) {
+            out:
+            for (Enemy enemy : bigenemys) {
+                if (!enemy.isVisible()) {
                     if (!enemy.isVisible()) {
                         if (enemy.getaBullets() != null) {
                             for (Bullet bullet : enemy.getaBullets()) {
@@ -343,63 +413,71 @@ public class MyView extends SurfaceView implements SurfaceHolder.Callback, Runna
                                 }
                             }
                         }
-                        enemy.setPosition(aRandom.nextInt(480 - enemy.getWidth()), -enemy.getHeight()+90);
-                        int speedY = aRandom.nextInt(1) + 2;
-                        enemy.setSpeedY(13);//速度
-                        //int v = (int) (2 - (Math.random() * -1));//随机真负数
-                        //enemy.setSpeedX(-v);
+                        enemy.setPosition(aRandom.nextInt(480 - enemy.getWidth()), -enemy.getHeight());
+                        int speedY = aRandom.nextInt(8) + 2;
+                        enemy.setSpeedY(speedY);
                         CopyOnWriteArrayList<Bullet> aBullets = new CopyOnWriteArrayList<>();
-                       /* for (int j = 0; j < aRandom.nextInt(); j++) { //子弹随机发射数量
+                        for (int j = 0; j < 3; j++) {
                             Bullet aBullet = new Bullet(bulletBitmap1);
-                            aBullet.setSpeedY(speedY + 3);
+                            aBullet.setSpeedY(speedY+2);
                             aBullets.add(aBullet);
-                        }*/
-                        //enemy.setaBullets(aBullets);
+                        }
+                        enemy.setaBullets(aBullets);
                         enemy.setVisible(true);
                         break;
+
                     }
                 }
             }
         }
-        //难度加大 出现中型飞机
-        if (step >= 1200 && step <= 1800) {
-            if (bigenemys != null) {
-                out:
-                for (Enemy enemy : bigenemys) {
-                    if (!enemy.isVisible()) {
-                        if (!enemy.isVisible()) {
-                            if (enemy.getaBullets() != null) {
-                                for (Bullet bullet : enemy.getaBullets()) {
-                                    if (bullet.isVisible()) {
-                                        continue out;
-                                    }
-                                }
-                            }
-                            enemy.setPosition(aRandom.nextInt(480 - enemy.getWidth()), -enemy.getHeight());
-                            int speedY = aRandom.nextInt(8) + 2;
-                            enemy.setSpeedY(speedY);
-                            CopyOnWriteArrayList<Bullet> aBullets = new CopyOnWriteArrayList<>();
-                            for (int j = 0; j < aRandom.nextInt(); j++) {
-                                Bullet aBullet = new Bullet(bulletBitmap1);
-                                aBullet.setSpeedY(speedY);
-                                aBullets.add(aBullet);
-                            }
-                            enemy.setaBullets(aBullets);
-                            enemy.setVisible(true);
-                            break;
+    }
 
+    private void ShowSmallEnemy() {
+        //Log.i("敌人出现", "第二批");
+        if (smallenemys != null) {
+            out:
+            for (Enemy enemy : smallenemys) {
+
+                if (!enemy.isVisible()) {
+                    if (enemy.getaBullets() != null) {
+                        for (Bullet bullet : enemy.getaBullets()) {
+                            if (bullet.isVisible()) {
+                                continue out;
+                            }
                         }
                     }
+                    enemy.setPosition(aRandom.nextInt(480 - enemy.getWidth()), -enemy.getHeight());
+                    int speedY = aRandom.nextInt(1) + 2;
+                    enemy.setSpeedY(6);
+                    //Log.i(TAG, "myStep: ");
+
+                    //int v = (int) (2 - (Math.random() * -1));//随机真负数
+                    //enemy.setSpeedX(-v);
+                    CopyOnWriteArrayList<Bullet> aBullets = new CopyOnWriteArrayList<>();
+                   /* for (int j = 0; j < aRandom.nextInt(); j++) { //子弹随机发射数量
+                        Bullet aBullet = new Bullet(bulletBitmap1);
+                        aBullet.setSpeedY(speedY + 3);
+                        aBullets.add(aBullet);
+                    }*/
+                    //enemy.setaBullets(aBullets);
+                    enemy.setVisible(true);
+                    break;
                 }
             }
-
-            //BOSS出现   /
-            if (step == 2000) {
-                Log.i("敌人出现", "老大出现");
-
-            }
-
         }
+    }
+
+    /*
+    *
+    * 出现失误*/
+    private void ShowGoods() {
+        mGoods = new Goods(goodsBitmap);
+        //设置食物的位置
+        mGoods.setPosition(240-mGoods.getWidth(),mGoods.getHeight()/2-mGoods.getHeight()-80);
+        //Log.i(TAG, "init: "+mGoods.getPosition());
+        mGoods.setSpeedY(5);
+        mGoods.setVisible(true);
+        mGoods.logic();
     }
 
     private void myDraw() {
@@ -409,28 +487,37 @@ public class MyView extends SurfaceView implements SurfaceHolder.Callback, Runna
             lockCanvas.drawColor(Color.rgb(194, 199, 203));//194,199,203
             lockCanvas.save();
             lockCanvas.scale(scaleX, scaleY);
+
             Paint mPaint = new Paint();
             mPaint.setStrokeWidth(3);
             mPaint.setTextSize(20);
 
             lockCanvas.drawBitmap(backgroundBitmap, 0, backgroundY1, null);
             lockCanvas.drawBitmap(backgroundBitmap, 0, backgroundY2, null);
+
             aPlayer.draw(lockCanvas);
             //准备开始绘制分数  count
+
             if (smallenemys != null) {
                 for (Enemy i : smallenemys) {
                     i.draw(lockCanvas);
                 }
             }
+
             if (bigenemys != null) {
                 for (Enemy i : bigenemys) {
                     i.draw(lockCanvas);
                 }
             }
+            if (mBossEnemy!=null){
+                mBossEnemy.draw(lockCanvas);
+            }
+            if (mGoods!=null){
+                mGoods.draw(lockCanvas);
+            }
             mPaint.setColor(Color.DKGRAY);
+            //Log.i(TAG, "食物的位置: "+mGoods.getPosition());
             lockCanvas.drawText("得分:" + count + " 时间" + step, 20, 40, mPaint);
-
-
             lockCanvas.restore();
 
         } catch (Exception e) {

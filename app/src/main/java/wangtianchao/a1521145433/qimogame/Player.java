@@ -17,6 +17,7 @@ public class Player extends Sprite{
     private CopyOnWriteArrayList<Bullet> mBullets;
     private int count;
     private Blast aBlast;
+    private int firecount=5;
 
     public Player(Bitmap bitmap) {
         super(bitmap);
@@ -55,7 +56,7 @@ public class Player extends Sprite{
 
     //玩家逻辑
     public void logic() {
-        if (count++ > 1) {
+        if (count++ > firecount) {
             fire(); //发射方法
             count = 0;
         }
@@ -106,6 +107,15 @@ public class Player extends Sprite{
         }
     }
 
+    public void setCount(int count) {
+        this.count = count;
+    }
 
+    public int getFirecount() {
+        return firecount;
+    }
 
+    public void setFirecount(int firecount) {
+        this.firecount = firecount;
+    }
 }

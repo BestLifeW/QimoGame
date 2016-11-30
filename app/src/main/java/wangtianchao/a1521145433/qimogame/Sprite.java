@@ -133,7 +133,9 @@ public class Sprite {
         this.x = x;
         this.y = y;
     }
-
+    public String  getPosition(){
+        return "x坐标"+this.x+"Y坐标"+this.y;
+    }
     public void draw(Canvas lockCanvas) {
         if (isVisible) {
             src.set(frameX[frameIndex], frameY[frameIndex], frameX[frameIndex] + width, frameY[frameIndex] + height);
