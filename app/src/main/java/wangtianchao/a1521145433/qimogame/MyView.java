@@ -534,7 +534,7 @@ public class MyView extends SurfaceView implements SurfaceHolder.Callback, Runna
     @Override
     public boolean onTouchEvent(MotionEvent event) {
 
-        gestureDetector.onTouchEvent(event);
+        gestureDetector.onTouchEvent(event);//
         //判断举行
         Log.i("触摸", event.getX() + "." + event.getY() + "");
         musicPlay = new RectF();
