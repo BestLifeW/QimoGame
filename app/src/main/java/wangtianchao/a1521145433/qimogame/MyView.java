@@ -6,6 +6,7 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Point;
+import android.graphics.RectF;
 import android.util.Log;
 import android.view.GestureDetector;
 import android.view.MotionEvent;
@@ -25,7 +26,7 @@ public class MyView extends SurfaceView implements SurfaceHolder.Callback, Runna
 
 
     private final SurfaceHolder holder;
-    private final MainActivity aMainActivity;
+    private final MainActivity context;
     private final float scaleX;
     private final float scaleY;
     private final GestureDetector gestureDetector;
@@ -57,12 +58,17 @@ public class MyView extends SurfaceView implements SurfaceHolder.Callback, Runna
     private static final String TAG = "MyView";
     private BossEnemy mBossEnemy;
     private Bitmap BossBitmap;
+    private Bitmap BossBoomBitmap;
+    private Bitmap musicBitmap;
+    private RectF musicPlay;
+    private int isPlay = 0;
+
 
     public MyView(Context context) {
         super(context);
         holder = getHolder();
         holder.addCallback(this);
-        aMainActivity = (MainActivity) context;
+        this.context = (MainActivity) context;
         WindowManager aWindowManager = (WindowManager) context.getSystemService(Context.WINDOW_SERVICE);
         aWindowManager.getDefaultDisplay().getSize(SCREENSIZE);
         scaleX = (float) SCREENSIZE.x / 480;
@@ -78,13 +84,11 @@ public class MyView extends SurfaceView implements SurfaceHolder.Callback, Runna
 
         //手势识别
         gestureDetector = new GestureDetector(context, new GestureDetector.SimpleOnGestureListener() {
-
             @Override
             public boolean onScroll(MotionEvent e1, MotionEvent e2, float distanceX, float distanceY) {
                 aPlayer.move(-distanceX, -distanceY);
                 return super.onScroll(e1, e2, distanceX, distanceY);
             }
-
 
             @Override
             public boolean onDoubleTap(MotionEvent e) {
@@ -108,9 +112,6 @@ public class MyView extends SurfaceView implements SurfaceHolder.Callback, Runna
 
         aPlayer = new Player(playerBitmap);
         aPlayer.setPosition(240 - aPlayer.getWidth() / 2, 700 - aPlayer.getHeight());
-        //初始化食物
-
-
         CopyOnWriteArrayList<Bullet> aBullets = new CopyOnWriteArrayList<>();
         for (int i = 0; i < 100; i++) {
             Bullet aBullet = new Bullet(bulletBitmap);
@@ -124,7 +125,7 @@ public class MyView extends SurfaceView implements SurfaceHolder.Callback, Runna
         smallenemys = new CopyOnWriteArrayList<>();
         bigenemys = new CopyOnWriteArrayList<>();
         aRandom = new Random(20);
-        mMyMusic = new MyMusic(aMainActivity);
+        mMyMusic = new MyMusic(context);
         mMyMusic.initSoundPool();
         mMyMusic.play("normalmusic.mp3");
         step = 0;
@@ -132,22 +133,23 @@ public class MyView extends SurfaceView implements SurfaceHolder.Callback, Runna
         count = 0; //分数重置
     }
 
-
-    /*
-    *
-    * 初始化图片*/
+    /* 初始化图片*/
     private void iniBitmap() {
-        backgroundBitmap = aMainActivity.getBitmap("bg_02.jpg");
-        playerBitmap = aMainActivity.getBitmap("oneplane.png");
-        bulletBitmap = aMainActivity.getBitmap("bullet2.png");
-        smallenemy = aMainActivity.getBitmap("small.png");
-        bulletBitmap1 = aMainActivity.getBitmap("bullet.png");
-        blastBitmap1 = aMainActivity.getBitmap("smallboom.png");
-        bigblast = aMainActivity.getBitmap("blast.png");
-        goodsBitmap = aMainActivity.getBitmap("goods.png");
-        bigenemy = aMainActivity.getBitmap("enemy.png");
-        myplaneboom = aMainActivity.getBitmap("myplaneboom.png");
-        BossBitmap = aMainActivity.getBitmap("bossplane1.png");
+        backgroundBitmap = context.getBitmap("bg_02.jpg");
+        playerBitmap = context.getBitmap("oneplane.png");
+        bulletBitmap = context.getBitmap("bullet2.png");
+        smallenemy = context.getBitmap("small.png");
+        bulletBitmap1 = context.getBitmap("bullet.png");
+        blastBitmap1 = context.getBitmap("smallboom.png");
+        bigblast = context.getBitmap("blast.png");
+        goodsBitmap = context.getBitmap("goods.png");
+        bigenemy = context.getBitmap("enemy.png");
+        myplaneboom = context.getBitmap("myplaneboom.png");
+        BossBitmap = context.getBitmap("bossplane1.png");
+        BossBoomBitmap = context.getBitmap("bossboom.png");
+        musicBitmap = context.getBitmap("music.png");
+
+
     }
 
     @Override
@@ -159,7 +161,6 @@ public class MyView extends SurfaceView implements SurfaceHolder.Callback, Runna
 
     @Override
     public void surfaceChanged(SurfaceHolder surfaceHolder, int i, int i1, int i2) {
-
     }
 
     @Override
@@ -172,12 +173,10 @@ public class MyView extends SurfaceView implements SurfaceHolder.Callback, Runna
     public void run() {
         while (isRun) {
             long startTime = System.currentTimeMillis();
-
             myDraw();
             if (!gameOver) {
                 myLogic();
             }
-
             long endTime = System.currentTimeMillis();
             long diffTime = endTime - startTime;
             if (diffTime < 1000 / 30) {
@@ -200,10 +199,9 @@ public class MyView extends SurfaceView implements SurfaceHolder.Callback, Runna
         if (backgroundY2 > backgroundBitmap.getHeight()) {
             backgroundY2 = -backgroundBitmap.getHeight();
         }
-
         myStep();
         aPlayer.logic();
-        if (mGoods!=null){
+        if (mGoods != null) {
             mGoods.logic();
         }
         if (smallenemys != null) {
@@ -219,19 +217,15 @@ public class MyView extends SurfaceView implements SurfaceHolder.Callback, Runna
         myCollision();
     }
 
-    /*
-    *
-    * */
     private void myCollision() {
         //小型飞机的碰撞方法
         if (smallenemys != null || bigenemys != null) {
-
             for (Enemy enemy : smallenemys) {
                 //判断碰到敌人
                 if (enemy.collisionWith(aPlayer)) {
                     enemy.setVisible(false);
                     Blast blast = aPlayer.getaBlast();
-                    blast.setPosition(aPlayer.getX(),aPlayer.getY());
+                    blast.setPosition(aPlayer.getX(), aPlayer.getY());
                     blast.setVisible(true);
                     aPlayer.setVisible(false);
                     //gameOver = true;
@@ -244,7 +238,7 @@ public class MyView extends SurfaceView implements SurfaceHolder.Callback, Runna
                             bullet.setVisible(true);
                             enemy.setVisible(false);
                             Blast blast = aPlayer.getaBlast();
-                            blast.setPosition(aPlayer.getX(),aPlayer.getY());
+                            blast.setPosition(aPlayer.getX(), aPlayer.getY());
                             //blast.setVisible(true);
                             //aPlayer.setVisible(false);
                             //gameOver = true;
@@ -272,60 +266,76 @@ public class MyView extends SurfaceView implements SurfaceHolder.Callback, Runna
             }
 
             //大型飞机的碰撞
-            for (Enemy i : bigenemys) {
+            for (Enemy enemy : bigenemys) {
                 //判断碰到敌人
-                if (i.collisionWith(aPlayer)) {
-                    i.setVisible(false);
+                if (enemy.collisionWith(aPlayer)) {
+                    enemy.setVisible(false);
                     Blast blast = aPlayer.getaBlast();
-                    blast.setPosition(aPlayer.getX(),aPlayer.getY());
+                    blast.setPosition(aPlayer.getX(), aPlayer.getY());
                     //blast.setVisible(true);
                     aPlayer.setVisible(false);
                     //gameOver = true;
                     mMyMusic.stop();
                 }
                 //被子弹击中
-                if (i.getaBullets() != null) {
-                    for (Bullet j : i.getaBullets()) {
-                        if (j.collisionWith(aPlayer)) {
-                            j.setVisible(false);
-                            i.setVisible(false);
+                if (enemy.getaBullets() != null) {
+                    for (Bullet bullet : enemy.getaBullets()) {
+                        if (bullet.collisionWith(aPlayer)) {
+                            bullet.setVisible(false);
+                            enemy.setVisible(false);
                             Blast blast = aPlayer.getaBlast();
-                            blast.setPosition(aPlayer.getX(),aPlayer.getY());
+                            blast.setPosition(aPlayer.getX(), aPlayer.getY());
                             //blast.setVisible(true);
                             aPlayer.setVisible(false);
-                           // gameOver = true;
+                            // gameOver = true;
                             mMyMusic.stop();
                         }
                     }
                 }
                 //判断子弹击中敌人
                 if (aPlayer.getmBullets() != null) {
-                    for (Bullet j : aPlayer.getmBullets()) {
-                        if (j.collisionWith(i)) {
-                            j.setVisible(false);
-                            i.setVisible(false);
+                    for (Bullet bullet : aPlayer.getmBullets()) {
+                        if (bullet.collisionWith(enemy)) {
+                            bullet.setVisible(false);
+                            enemy.setVisible(false);
                             count += 30;
-                            Blast blast = i.getaBlast();
-                            blast.setPosition(i.getX(), i.getY());
+                            Blast blast = enemy.getaBlast();
+                            blast.setPosition(enemy.getX(), enemy.getY());
                             blast.setVisible(true);
                             mMyMusic.play(mMyMusic.boomMusic);
                         }
                     }
                 }
-
                 //食物的碰撞
-                if (aPlayer!=null){
-                    if (mGoods!=null){
-                    if (aPlayer.collisionWith(mGoods)){
-                        mGoods.setVisible(false);
-                        aPlayer.setFirecount(1);
+                if (aPlayer != null) {
+                    if (mGoods != null) {
+                        if (aPlayer.collisionWith(mGoods)) {
+                            mGoods.setVisible(false);
+                            aPlayer.setFirecount(1);//设置子弹速度
+                        }
                     }
-                }}
+                }
+                //判断boss被攻击
+                if (aPlayer != null) {
+                    for (Bullet bullet : aPlayer.getmBullets()) {
+                        if (mBossEnemy != null) {
+                            if (bullet.collisionWith(mBossEnemy)) {
+                                bullet.setVisible(false);
+                                mBossEnemy.ReduceBlood(); //BOSS扣血
+                                if (mBossEnemy.getBlood() == 0) {
+                                    Log.i(TAG, "myCollision: 啊啊啊啊我死了啦");
+                                    Blast blast = mBossEnemy.getaBlast();
+                                    blast.setPosition(mBossEnemy.getX(), mBossEnemy.getY());
+                                    blast.setVisible(true);
+                                    mBossEnemy.setVisible(false);
+                                }
 
+                            }
+                        }
+                    }
+                }
             }
-
         }
-
     }
 
     /*
@@ -340,9 +350,10 @@ public class MyView extends SurfaceView implements SurfaceHolder.Callback, Runna
 
         }
         //炸弹包
-        if (step == 120&&step<=500) {
+        if (step == 120 && step <= 500) {
+            //加快子弹的速度
             ShowGoods();
-
+            ShowBoss();
         }
         //展示小型飞机
         if (step >= 500 && step <= 1100) {
@@ -354,8 +365,8 @@ public class MyView extends SurfaceView implements SurfaceHolder.Callback, Runna
             ShowBigEnemy();
         }
         //出现BOSS
-        if (step >= 1801&&step<=2500) {
-            ShowBoss();
+        if (step >= 1801 && step <= 2500) {
+
         }
     }
 
@@ -383,19 +394,19 @@ public class MyView extends SurfaceView implements SurfaceHolder.Callback, Runna
     private void ShowBoss() {
         Log.i("敌人出现", "老大出现");
         mBossEnemy = new BossEnemy(BossBitmap);
-        Log.i(TAG, "ShowBoss: "+mBossEnemy.getPosition()+mBossEnemy.getWidth()+mBossEnemy.getHeight());
+        // Log.i(TAG, "ShowBoss: "+mBossEnemy.getPosition()+mBossEnemy.getWidth()+mBossEnemy.getHeight());
         mBossEnemy.setSpeedX(5);
-        mBossEnemy.outOfBounds();
-        mBossEnemy.setPosition(30,80);
+        mBossEnemy.setPosition(240 - mBossEnemy.getWidth() / 2, 80);
 
         CopyOnWriteArrayList<Bullet> abullets = new CopyOnWriteArrayList<>();
-        for (int i=1;i<=step;i++){
-            Bullet abullet= new Bullet(bulletBitmap);
+        for (int i = 1; i <= 50; i++) {
+            Bullet abullet = new Bullet(bulletBitmap);
             abullets.add(abullet);
             abullet.setSpeedY(3);
         }
+        Blast blast = new Blast(BossBoomBitmap, 162, 108);
+        mBossEnemy.setaBlast(blast);
         mBossEnemy.setaBullets(abullets);
-
         mBossEnemy.logic();
         mBossEnemy.setVisible(true);
     }
@@ -419,7 +430,7 @@ public class MyView extends SurfaceView implements SurfaceHolder.Callback, Runna
                         CopyOnWriteArrayList<Bullet> aBullets = new CopyOnWriteArrayList<>();
                         for (int j = 0; j < 3; j++) {
                             Bullet aBullet = new Bullet(bulletBitmap1);
-                            aBullet.setSpeedY(speedY+2);
+                            aBullet.setSpeedY(speedY + 2);
                             aBullets.add(aBullet);
                         }
                         enemy.setaBullets(aBullets);
@@ -433,11 +444,9 @@ public class MyView extends SurfaceView implements SurfaceHolder.Callback, Runna
     }
 
     private void ShowSmallEnemy() {
-        //Log.i("敌人出现", "第二批");
         if (smallenemys != null) {
             out:
             for (Enemy enemy : smallenemys) {
-
                 if (!enemy.isVisible()) {
                     if (enemy.getaBullets() != null) {
                         for (Bullet bullet : enemy.getaBullets()) {
@@ -449,17 +458,13 @@ public class MyView extends SurfaceView implements SurfaceHolder.Callback, Runna
                     enemy.setPosition(aRandom.nextInt(480 - enemy.getWidth()), -enemy.getHeight());
                     int speedY = aRandom.nextInt(1) + 2;
                     enemy.setSpeedY(6);
-                    //Log.i(TAG, "myStep: ");
-
-                    //int v = (int) (2 - (Math.random() * -1));//随机真负数
-                    //enemy.setSpeedX(-v);
                     CopyOnWriteArrayList<Bullet> aBullets = new CopyOnWriteArrayList<>();
-                   /* for (int j = 0; j < aRandom.nextInt(); j++) { //子弹随机发射数量
+                    for (int j = 0; j < aRandom.nextInt(); j++) { //子弹随机发射数量
                         Bullet aBullet = new Bullet(bulletBitmap1);
                         aBullet.setSpeedY(speedY + 3);
                         aBullets.add(aBullet);
-                    }*/
-                    //enemy.setaBullets(aBullets);
+                    }
+                    enemy.setaBullets(aBullets);
                     enemy.setVisible(true);
                     break;
                 }
@@ -467,21 +472,15 @@ public class MyView extends SurfaceView implements SurfaceHolder.Callback, Runna
         }
     }
 
-    /*
-    *
-    * 出现失误*/
     private void ShowGoods() {
         mGoods = new Goods(goodsBitmap);
-        //设置食物的位置
-        mGoods.setPosition(240-mGoods.getWidth(),mGoods.getHeight()/2-mGoods.getHeight()-80);
-        //Log.i(TAG, "init: "+mGoods.getPosition());
+        mGoods.setPosition(240 - mGoods.getWidth(), mGoods.getHeight() / 2 - mGoods.getHeight() - 80);
         mGoods.setSpeedY(5);
         mGoods.setVisible(true);
         mGoods.logic();
     }
 
     private void myDraw() {
-
         try {
             lockCanvas = holder.lockCanvas();
             lockCanvas.drawColor(Color.rgb(194, 199, 203));//194,199,203
@@ -494,6 +493,8 @@ public class MyView extends SurfaceView implements SurfaceHolder.Callback, Runna
 
             lockCanvas.drawBitmap(backgroundBitmap, 0, backgroundY1, null);
             lockCanvas.drawBitmap(backgroundBitmap, 0, backgroundY2, null);
+            //音乐图标绘制
+            lockCanvas.drawBitmap(musicBitmap, 240 + musicBitmap.getWidth(), 20, null);
 
             aPlayer.draw(lockCanvas);
             //准备开始绘制分数  count
@@ -509,10 +510,10 @@ public class MyView extends SurfaceView implements SurfaceHolder.Callback, Runna
                     i.draw(lockCanvas);
                 }
             }
-            if (mBossEnemy!=null){
+            if (mBossEnemy != null) {
                 mBossEnemy.draw(lockCanvas);
             }
-            if (mGoods!=null){
+            if (mGoods != null) {
                 mGoods.draw(lockCanvas);
             }
             mPaint.setColor(Color.DKGRAY);
@@ -532,7 +533,27 @@ public class MyView extends SurfaceView implements SurfaceHolder.Callback, Runna
 
     @Override
     public boolean onTouchEvent(MotionEvent event) {
+
         gestureDetector.onTouchEvent(event);
+        //判断举行
+        Log.i("触摸", event.getX() + "." + event.getY() + "");
+        musicPlay = new RectF();
+        musicPlay.set((240 + musicBitmap.getWidth()) * scaleX, 20 * scaleY, (240 + musicBitmap.getWidth() * 2) * scaleX, (20 + musicBitmap.getWidth()) * scaleY);
+        if (event.getAction() == MotionEvent.ACTION_DOWN) {
+            if (musicPlay.contains(event.getX(), event.getY())) {
+                if (isPlay % 2 == 0) {  //奇数
+                    mMyMusic.stop();
+                    isPlay++;
+                    Log.i("音乐", "onTouchEvent: 暂停啦");
+                } else {
+                    mMyMusic.play("normalmusic.mp3");
+                    isPlay++;
+                    Log.i("音乐", "onTouchEvent: 播放啦");
+                }
+
+            }
+        }
         return super.onTouchEvent(event);
     }
+
 }

@@ -10,7 +10,7 @@ public class BossEnemy extends Enemy {
 
 
     //BOSS的血量
-    private int blood ;
+    private int blood =30;
 
 
     public BossEnemy(Bitmap aBitmap) {
@@ -24,5 +24,9 @@ public class BossEnemy extends Enemy {
 
     public void setBlood(int blood) {
         this.blood = blood;
+    }
+
+    public void ReduceBlood(){
+        blood--;
     }
 }

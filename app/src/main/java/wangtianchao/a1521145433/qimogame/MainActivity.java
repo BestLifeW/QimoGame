@@ -19,7 +19,6 @@ public class MainActivity extends Activity {
         Bitmap bitmap = null;
 
         try {
-            //context.getClass().getClassLoader().getResourceAsStream("assets/"+资源名);
             bitmap = BitmapFactory.decodeStream(getAssets().open(fileName));
         } catch (IOException e) {
             e.printStackTrace();
