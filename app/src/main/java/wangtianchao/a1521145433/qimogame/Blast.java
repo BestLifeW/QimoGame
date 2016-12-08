@@ -20,5 +20,4 @@ public class Blast extends Sprite {
         }
     }
 
-
 }

@@ -14,7 +14,7 @@ public class Enemy extends Sprite {
     private CopyOnWriteArrayList<Bullet> aBullets;
     private int count;
     private Blast aBlast;
-    private boolean isFire =true;
+    private boolean isFire = true;
 
 
     public void setFire(boolean fire) {
@@ -45,29 +45,31 @@ public class Enemy extends Sprite {
 
     public void draw(Canvas lockCanvas) {
         super.draw(lockCanvas);
-        if (aBullets!=null){
-            for (Bullet bullet :aBullets){
+        if (aBullets != null) {
+            for (Bullet bullet : aBullets) {
                 bullet.draw(lockCanvas);
             }
         }
-        if (aBlast!=null){
+        if (aBlast != null) {
             aBlast.draw(lockCanvas);
         }
     }
 
 
     public void logic() {
-        move(getSpeedX(),getSpeedY());
-        if (count++>10){
-            fire();
+        move(getSpeedX(), getSpeedY());
+        if (count++ > 10) {
+            if (isVisible()) {
+                fire();
+            }
             count = 0;
         }
-        if (aBullets!=null){
-            for (Bullet bullet :aBullets){
+        if (aBullets != null) {
+            for (Bullet bullet : aBullets) {
                 bullet.logic();
             }
         }
-        if (aBlast!=null){
+        if (aBlast != null) {
             aBlast.logic();
         }
 
@@ -75,21 +77,21 @@ public class Enemy extends Sprite {
     }
 
     private void fire() {
-        if (isFire){
-            if (aBullets!=null){
+        if (isFire) {
+            if (aBullets != null) {
                 for (Bullet bullet : aBullets) {
-                    if (!bullet.isVisible()){
-                        bullet.setPosition(getX()+getWidth()/2-bullet.getWidth()/2,getY()+getHeight());
+                    if (!bullet.isVisible()) {
+                        bullet.setPosition(getX() + getWidth() / 2 - bullet.getWidth() / 2, getY() + getHeight());
                         bullet.setVisible(true);
                         break;
-                }
+                    }
                 }
             }
         }
     }
 
-    public void outOfBounds(){
-        if (getX()<0||getY()>800||getY()>800){//480的屏幕太小 导致敌机还未出屏幕就消失  所以改成800
+    public void outOfBounds() {
+        if (getX() < 0 || getY() > 800 || getY() > 800) {//480的屏幕太小 导致敌机还未出屏幕就消失  所以改成800
             setVisible(false);
         }
     }

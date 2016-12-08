@@ -148,14 +148,11 @@ public class MyView extends SurfaceView implements SurfaceHolder.Callback, Runna
         BossBitmap = context.getBitmap("bossplane1.png");
         BossBoomBitmap = context.getBitmap("bossboom.png");
         musicBitmap = context.getBitmap("music.png");
-
-
     }
 
     @Override
     public void surfaceCreated(SurfaceHolder surfaceHolder) {
         isRun = true;
-
         new Thread(this).start();
     }
 
@@ -213,6 +210,9 @@ public class MyView extends SurfaceView implements SurfaceHolder.Callback, Runna
             for (Enemy i : bigenemys) {
                 i.logic();
             }
+        }
+        if (mBossEnemy!=null){
+            mBossEnemy.logic();
         }
         myCollision();
     }
@@ -353,10 +353,10 @@ public class MyView extends SurfaceView implements SurfaceHolder.Callback, Runna
         if (step == 120 && step <= 500) {
             //加快子弹的速度
             ShowGoods();
-            ShowBoss();
+
         }
         //展示小型飞机
-        if (step >= 500 && step <= 1100) {
+        if (step >= 600 && step <= 1100) {
             ShowSmallEnemy();
 
         }
@@ -366,17 +366,30 @@ public class MyView extends SurfaceView implements SurfaceHolder.Callback, Runna
         }
         //出现BOSS
         if (step >= 1801 && step <= 2500) {
-
+            ShowBoss();
         }
     }
 
     private void FristEnemy() {
         //Log.i("敌人出现", "第一批");
-        for (int i = 0; i < 4; i++) {
-            for (int j = 0; j < 2 * i + 1; j++) {
-                Enemy aEnemy = new Enemy(smallenemy);
-                Enemy bigemy = new Enemy(bigenemy);
-                aEnemy.setPosition(240 - aEnemy.getWidth() / 2 + 60 * (j - i), -aEnemy.getHeight() - 80 * i);
+
+
+        /*
+        *
+        * for (int i = 1; i < 4; i++) {
+				for (int j = 0; j < 12; j++) {
+					if(j<=2-i||(j>=2+i&&j<=5-i)||j>=5+i){
+					}else{
+						Gold aGold=new Gold(aGoldBitmaps, 30, 30);
+						aGold.setPosition(375+30*j, 30+30*i);
+						aGold.setState(Gold.GOLD_EXIST);
+						aGold.setVisible(true);
+						aGolds.add(aGold);
+
+
+						  Enemy aEnemy = new Enemy(smallenemy);
+                          Enemy bigemy = new Enemy(bigenemy);
+                aEnemy.setPosition(375+30*j, 30+30*i);
                 bigemy.setPosition(240 - bigemy.getWidth() / 2 + 60 * (j - i), -bigemy.getHeight() - 80 * i);
                 aEnemy.setSpeedY(2);
                 Blast aBlast = new Blast(blastBitmap1, 34, 34);//初始化爆炸效果
@@ -387,7 +400,43 @@ public class MyView extends SurfaceView implements SurfaceHolder.Callback, Runna
                 bigemy.setVisible(true);
                 smallenemys.add(aEnemy);
                 bigenemys.add(bigemy);
+					}
+				}
+			}
+			for (int i = 1; i <5; i++) {
+				for (int j = 0; j < 12; j++) {
+					if(j>=i-1&&j<=8-i){
+						Gold aGold=new Gold(aGoldBitmaps, 30, 30);
+						aGold.setPosition(375+30*j, 120+30*i);
+						aGold.setState(Gold.GOLD_EXIST);
+						aGold.setVisible(true);
+						aGolds.add(aGold);
+					}else {
+
+					}
+				}
+			}
+		}
+        * */
+        for (int i = 1; i < 4; i++) {
+            for (int j = 0; j < 12; j++) {
+                //if(j<=2-i||(j>=2+i&&j<=5-i)||j>=5+i){
+               // }else{
+                Enemy aEnemy = new Enemy(smallenemy);
+                Enemy bigemy = new Enemy(bigenemy);
+                aEnemy.setPosition(240 - aEnemy.getWidth() / 2 + 60 *i, -aEnemy.getHeight() - 80 * j);
+                bigemy.setPosition(240 - aEnemy.getWidth() / 2 + 60 *i, -aEnemy.getHeight() - 80 * j);
+                aEnemy.setSpeedY(2);
+                Blast aBlast = new Blast(blastBitmap1, 34, 34);//初始化爆炸效果
+                Blast aBlast1 = new Blast(bigblast, 68, 70);
+                aEnemy.setaBlast(aBlast);
+                aEnemy.setVisible(true);
+                bigemy.setaBlast(aBlast1);
+                bigemy.setVisible(true);
+                smallenemys.add(aEnemy);
+                bigenemys.add(bigemy);
             }
+           // }
         }
     }
 

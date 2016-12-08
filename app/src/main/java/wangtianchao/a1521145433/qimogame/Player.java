@@ -11,13 +11,13 @@ import java.util.concurrent.CopyOnWriteArrayList;
  * 玩家类
  */
 
-public class Player extends Sprite{
+public class Player extends Sprite {
 
 
     private CopyOnWriteArrayList<Bullet> mBullets;
     private int count;
     private Blast aBlast;
-    private int firecount=5;
+    private int firecount = 5;
 
     public Player(Bitmap bitmap) {
         super(bitmap);
@@ -48,7 +48,7 @@ public class Player extends Sprite{
                 bullet.draw(lockCanvas);
             }
         }
-        if (aBlast!=null){
+        if (aBlast != null) {
             aBlast.draw(lockCanvas);
         }
     }
@@ -57,7 +57,9 @@ public class Player extends Sprite{
     //玩家逻辑
     public void logic() {
         if (count++ > firecount) {
-            fire(); //发射方法
+            if (isVisible()) {
+                fire(); //发射方法
+            }
             count = 0;
         }
         if (mBullets != null) {
@@ -68,7 +70,7 @@ public class Player extends Sprite{
                 }
             }
         }
-        if (aBlast!=null){
+        if (aBlast != null) {
             aBlast.logic();
         }
         outOfBounds();
@@ -77,15 +79,15 @@ public class Player extends Sprite{
     //开火
     private void fire() {
 
-                if (mBullets != null) {
-                    for (Bullet bullet : mBullets) {
-                        if (!bullet.isVisible()) {
-                            bullet.setPosition(getX() + getWidth() / 2 - bullet.getWidth() / 2, getY());
-                            bullet.setVisible(true);
-                            break;
-                        }
-                    }
+        if (mBullets != null) {
+            for (Bullet bullet : mBullets) {
+                if (!bullet.isVisible()) {
+                    bullet.setPosition(getX() + getWidth() / 2 - bullet.getWidth() / 2, getY());
+                    bullet.setVisible(true);
+                    break;
                 }
+            }
+        }
 
     }
 
