@@ -239,9 +239,9 @@ public class MyView extends SurfaceView implements SurfaceHolder.Callback, Runna
                             enemy.setVisible(false);
                             Blast blast = aPlayer.getaBlast();
                             blast.setPosition(aPlayer.getX(), aPlayer.getY());
-                            //blast.setVisible(true);
-                            //aPlayer.setVisible(false);
-                            //gameOver = true;
+                            blast.setVisible(true);
+                            aPlayer.setVisible(false);
+                            gameOver = true;
                             mMyMusic.stop();
                         }
                     }
@@ -566,7 +566,6 @@ public class MyView extends SurfaceView implements SurfaceHolder.Callback, Runna
                 mGoods.draw(lockCanvas);
             }
             mPaint.setColor(Color.DKGRAY);
-            //Log.i(TAG, "食物的位置: "+mGoods.getPosition());
             lockCanvas.drawText("得分:" + count + " 时间" + step, 20, 40, mPaint);
             lockCanvas.restore();
 
@@ -577,7 +576,6 @@ public class MyView extends SurfaceView implements SurfaceHolder.Callback, Runna
                 holder.unlockCanvasAndPost(lockCanvas);
             }
         }
-
     }
 
     @Override
@@ -585,7 +583,6 @@ public class MyView extends SurfaceView implements SurfaceHolder.Callback, Runna
 
         gestureDetector.onTouchEvent(event);//
         //判断举行
-        Log.i("触摸", event.getX() + "." + event.getY() + "");
         musicPlay = new RectF();
         musicPlay.set((240 + musicBitmap.getWidth()) * scaleX, 20 * scaleY, (240 + musicBitmap.getWidth() * 2) * scaleX, (20 + musicBitmap.getWidth()) * scaleY);
         if (event.getAction() == MotionEvent.ACTION_DOWN) {
@@ -593,16 +590,12 @@ public class MyView extends SurfaceView implements SurfaceHolder.Callback, Runna
                 if (isPlay % 2 == 0) {  //奇数
                     mMyMusic.stop();
                     isPlay++;
-                    Log.i("音乐", "onTouchEvent: 暂停啦");
                 } else {
                     mMyMusic.play("normalmusic.mp3");
                     isPlay++;
-                    Log.i("音乐", "onTouchEvent: 播放啦");
                 }
-
             }
         }
         return super.onTouchEvent(event);
     }
-
 }
