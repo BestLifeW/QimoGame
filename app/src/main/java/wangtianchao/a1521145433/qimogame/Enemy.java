@@ -81,7 +81,8 @@ public class Enemy extends Sprite {
             if (aBullets != null) {
                 for (Bullet bullet : aBullets) {
                     if (!bullet.isVisible()) {
-                        bullet.setPosition(getX() + getWidth() / 2 - bullet.getWidth() / 2, getY() + getHeight());
+                        bullet.setPosition(getX() + getWidth() / 2 -
+                                bullet.getWidth() / 2, getY() + getHeight());
                         bullet.setVisible(true);
                         break;
                     }
